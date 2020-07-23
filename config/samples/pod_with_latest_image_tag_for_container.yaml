@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-bad-img-uri-1
+spec:
+  containers:
+    - name: container-with-bad-img-uri
+      image: gcr.io/anastasiial2020/go-webserver:latest
