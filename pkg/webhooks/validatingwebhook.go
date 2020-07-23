@@ -14,14 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package webhooks
 
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/zapr"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -29,7 +32,7 @@ import (
 
 // +kubebuilder:webhook:path=/validate-v1-pod,mutating=false,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
 
-type imageTagValidator struct {
+type PodValidator struct {
 	Client  client.Client
 	decoder *admission.Decoder
 }
@@ -38,7 +41,15 @@ var restrictedTags = map[string]bool{
 	"latest": true,
 }
 
-func (v *imageTagValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (v *PodValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+	var log logr.Logger
+	zapLog, logErr := zap.NewDevelopment()
+	if logErr != nil {
+		panic(fmt.Sprintf("who watches the watchmen (%v)?", logErr))
+	}
+	log = zapr.NewLogger(zapLog)
+	log.Info("Logging the request info ::: ", "req : ", req)
+
 	pod := &corev1.Pod{}
 
 	err := v.decoder.Decode(req, pod)
@@ -61,10 +72,10 @@ func (v *imageTagValidator) Handle(ctx context.Context, req admission.Request) a
 	return admission.Allowed("")
 }
 
-// imageTagValidator implements admission.DecoderInjector.
+// PodValidator implements admission.DecoderInjector.
 // A decoder will be automatically injected.
 
-func (v *imageTagValidator) InjectDecoder(d *admission.Decoder) error {
+func (v *PodValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil
 }

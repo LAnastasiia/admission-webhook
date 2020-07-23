@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"adm-wh/pkg/webhooks"
 	"flag"
 	"os"
 
@@ -71,7 +72,7 @@ func main() {
 	hookServer := mgr.GetWebhookServer()
 
 	setupLog.Info("registering webhooks to the webhook server")
-	hookServer.Register("/validate-v1-pod", &webhook.Admission{Handler: &imageTagValidator{Client: mgr.GetClient()}})
+	hookServer.Register("/validate-v1-pod", &webhook.Admission{Handler: &webhooks.PodValidator{Client: mgr.GetClient()}})
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
