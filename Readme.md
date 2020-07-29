@@ -1,4 +1,4 @@
-### Create the project
+### To create the project
 
 `export PATH=$PATH:/usr/local/kubebuilder/bin`
 
@@ -8,17 +8,23 @@
 `kubebuilder create api --group "core" --kind "Pod" --version "v1"`
 
 
-List of resources & respective Kinds:
-https://kubernetes.io/docs/reference/kubectl/overview/#resource-types
-
-`gcr.io/<registry_name>/<image_name>:<tagname>`
-
-To run locally:
+#### To run locally:
 
 `./generate-keys-for-local-runs.sh`
 
 `make run ENABLE_WEBHOOKS=true`
 
-> in new terminal tab 
+In new terminal tab: 
 
-`curl --request POST -k --header "Content-Type: application/json" --data @sample-request-body.json https://localhost:9443/validate-v1-pod` 
+`cd ./pkg/webhooks/testdata`
+`curl --request POST -k --header "Content-Type: application/json" --data @admission-review.json https://localhost:9443/validate-v1-pod` 
+
+
+#### Tests:
+- Unit-test for validating f-ns:  
+`go test github.com/LAnastasiia/admission-webhook/pkg/webhooks`
+
+- E2E test  
+`cd ./pkg/webhooks/`  
+`chmod +x validatingwebhook_test.sh`  
+`./validatingwebhook_test.sh`  
