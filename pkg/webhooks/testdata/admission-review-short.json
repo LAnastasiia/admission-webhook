@@ -1,0 +1,73 @@
+{
+  "kind": "AdmissionReview",
+  "apiVersion": "admission.k8s.io/v1beta1",
+  "request": {
+    "uid": "7f0b2891-916f-4ed6-b7cd-27bff1815a8c",
+    "kind": {
+    "group": "",
+    "version": "v1",
+    "kind": "Pod"
+  },
+  "resource": {
+    "group": "",
+    "version": "v1",
+    "resource": "pods"
+  },
+  "requestKind": {
+    "group": "",
+    "version": "v1",
+    "kind": "Pod"
+  },
+  "requestResource": {
+    "group": "",
+    "version": "v1",
+    "resource": "pods"
+  },
+  "namespace": "yolo",
+  "operation": "CREATE",
+  "userInfo": {
+    "username": "kubernetes-admin",
+    "groups": [
+      "system:masters",
+      "system:authenticated"
+    ]
+  },
+  "object": {
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {},
+    "spec": {
+      "containers": [
+        {
+          "name": "cont-1",
+          "image": "img-repo:latest",
+          "resources": {},
+          "imagePullPolicy": "IfNotPresent"
+        },
+        {
+          "name": "cont-1",
+          "image": "img-repo:latest",
+          "resources": {},
+          "imagePullPolicy": "IfNotPresent"
+        }
+      ],
+      "restartPolicy": "Always",
+      "terminationGracePeriodSeconds": 30,
+      "dnsPolicy": "ClusterFirst",
+      "serviceAccountName": "default",
+      "serviceAccount": "default",
+      "securityContext": {},
+      "schedulerName": "default-scheduler",
+      "priority": 0,
+      "enableServiceLinks": true
+      },
+      "status": {}
+      },
+      "oldObject": null,
+      "dryRun": false,
+      "options": {
+        "kind": "CreateOptions",
+        "apiVersion": "meta.k8s.io/v1"
+      }
+    }
+}

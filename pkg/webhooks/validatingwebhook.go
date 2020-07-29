@@ -18,20 +18,15 @@ package webhooks
 
 import (
 	"context"
-	"fmt"
-	"go.uber.org/zap"
-	"net/http"
-	"strings"
-
-	"github.com/go-logr/logr"
-	"github.com/go-logr/zapr"
 	corev1 "k8s.io/api/core/v1"
+	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// +kubebuilder:webhook:path=/validate-v1-pod,mutating=false,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
+// +kubebuilder:webhook:path=/validate-v1-pod,mutating=false,failurePolicy=fail,groups="core",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
 
+// podValidator validates Pods
 type PodValidator struct {
 	Client  client.Client
 	decoder *admission.Decoder
@@ -41,40 +36,30 @@ var restrictedTags = map[string]bool{
 	"latest": true,
 }
 
+var validators = []func(p corev1.Pod) admission.Response{
+	ValidateImageTag,
+}
+
+// podValidator validates a pod's status and specs.
 func (v *PodValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
-	var log logr.Logger
-	zapLog, logErr := zap.NewDevelopment()
-	if logErr != nil {
-		panic(fmt.Sprintf("who watches the watchmen (%v)?", logErr))
-	}
-	log = zapr.NewLogger(zapLog)
-	log.Info("Logging the request info ::: ", "req : ", req)
-
 	pod := &corev1.Pod{}
-
 	err := v.decoder.Decode(req, pod)
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	for _, container := range pod.Spec.Containers {
-		containerImageString := container.Image
-		i := strings.Index(containerImageString, ":")
-		if i > -1 {
-			tagString := containerImageString[i+1:]
-			if _, keyPresent := restrictedTags[tagString]; keyPresent {
-				return admission.Denied(fmt.Sprintf(":%s tag (used in image URI for container '%s') "+
-					"is not allowed for security reasons", tagString, container.Name))
-			}
+	for _, v := range validators {
+		if response := v(*pod); !response.Allowed {
+			return response
 		}
-
 	}
-	return admission.Allowed("")
+	return admission.Allowed("all validators passed")
 }
 
 // PodValidator implements admission.DecoderInjector.
 // A decoder will be automatically injected.
 
+// InjectDecoder injects the decoder.
 func (v *PodValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil

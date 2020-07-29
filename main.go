@@ -17,11 +17,13 @@ limitations under the License.
 package main
 
 import (
-	"adm-wh/pkg/webhooks"
 	"flag"
+	"github.com/LAnastasiia/admission-webhook/pkg/webhooks"
 	"os"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -40,6 +42,8 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	_ = corev1.AddToScheme(scheme)
+	_ = appsv1.AddToScheme(scheme)
+	_ = apiextv1beta1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -66,10 +70,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	// +kubebuilder:scaffold:builder
-
 	setupLog.Info("setting up a webhook server")
 	hookServer := mgr.GetWebhookServer()
+	hookServer.CertDir = "tls-secret-dir"
 
 	setupLog.Info("registering webhooks to the webhook server")
 	hookServer.Register("/validate-v1-pod", &webhook.Admission{Handler: &webhooks.PodValidator{Client: mgr.GetClient()}})
@@ -79,4 +82,6 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+
+	setupLog.Info(hookServer.Host)
 }
