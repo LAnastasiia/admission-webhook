@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+var restrictedTags = map[string]bool{
+	"latest": true,
+}
+
 func ValidateImageTag(pod corev1.Pod) admission.Response {
 	for _, container := range pod.Spec.Containers {
 		containerImageString := container.Image

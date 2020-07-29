@@ -32,10 +32,6 @@ type PodValidator struct {
 	decoder *admission.Decoder
 }
 
-var restrictedTags = map[string]bool{
-	"latest": true,
-}
-
 var validators = []func(p corev1.Pod) admission.Response{
 	ValidateImageTag,
 }
