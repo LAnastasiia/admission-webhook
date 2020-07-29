@@ -9,6 +9,7 @@ import (
 	"testing"
 )
 
+// testData contains pairs of Pod definitions and desired admission returns for them.
 var testData = []struct {
 	examplePods    corev1.Pod
 	expectedReturn admission.Response

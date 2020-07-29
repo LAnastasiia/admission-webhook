@@ -32,6 +32,7 @@ type PodValidator struct {
 	decoder *admission.Decoder
 }
 
+// validators is a slice of pod-validating functions used for this webhook logic
 var validators = []func(p corev1.Pod) admission.Response{
 	ValidateImageTag,
 }

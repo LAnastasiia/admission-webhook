@@ -11,6 +11,10 @@ var restrictedTags = map[string]bool{
 	"latest": true,
 }
 
+// ValidateImageTag checks if containers are defined with proper tags
+// e.g. image uri: `gcr.io/<registry_name>/<image_name>:<tagname>`
+// For now ValidateImageTag only verifies that the 'latest' tag isn't used so that container won't be using
+// an unexpectedly-pushed version of the image when pulling the latest one from image repository.
 func ValidateImageTag(pod corev1.Pod) admission.Response {
 	for _, container := range pod.Spec.Containers {
 		containerImageString := container.Image
